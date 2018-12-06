@@ -3,6 +3,7 @@ package com.github.marschall.jfrjdbctemplate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.CallableStatementCallback;
@@ -27,6 +28,9 @@ import jdk.jfr.Description;
 import jdk.jfr.Event;
 import jdk.jfr.Label;
 
+/**
+ * An implementation of {@link JdbcOperations} that generates JFR events.
+ */
 public final class JfrJdbcOperations implements JdbcOperations {
 
   // http://hirt.se/blog/?p=870
@@ -34,18 +38,42 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   private final JdbcOperations delegate;
 
+  /**
+   * Constructs a new {@link JfrJdbcOperations}.
+   * 
+   * @param delegate the actual {@link JdbcOperations} implementation
+   */
   public JfrJdbcOperations(JdbcOperations delegate) {
+    Objects.requireNonNull(delegate, "delegate");
     this.delegate = delegate;
   }
 
   @Override
   public <T> T execute(ConnectionCallback<T> action) {
-    return this.delegate.execute(action);
+    JdbcEvent event = new JdbcEvent();
+    event.setOperationName("execute");
+    event.setQuery(getSql(action));
+    event.begin();
+    try {
+      return this.delegate.execute(action);
+    } finally {
+      event.end();
+      event.commit();
+    }
   }
 
   @Override
   public <T> T execute(StatementCallback<T> action) {
-    return this.delegate.execute(action);
+    JdbcEvent event = new JdbcEvent();
+    event.setOperationName("execute");
+    event.setQuery(getSql(action));
+    event.begin();
+    try {
+      return this.delegate.execute(action);
+    } finally {
+      event.end();
+      event.commit();
+    }
   }
 
   @Override
