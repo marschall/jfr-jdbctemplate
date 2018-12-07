@@ -1,5 +1,7 @@
 module com.github.marschall.jfrjdbctemplate {
 
+  requires java.sql;
+
   requires jdk.jfr;
 
   requires spring.beans; // required for tests

@@ -122,6 +122,12 @@
         </executions>
       </plugin>
       <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <argLine>--add-opens com.github.marschall.jfrjdbctemplate/com.github.marschall.jfrjdbctemplate=ALL-UNNAMED</argLine>
+        </configuration>
+      </plugin>
+      <plugin>
         <artifactId>maven-source-plugin</artifactId>
         <executions>
           <execution>
