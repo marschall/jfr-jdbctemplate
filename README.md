@@ -11,7 +11,6 @@ Usage
 You need something like the following JVM options to run Flight Recorder
 
 ```
--XX:+FlightRecorder
--XX:StartFlightRecording=disk=true,dumponexit=true,filename=recording.jfr
--XX:FlightRecorderOptions=stackdepth=128
+-XX:StartFlightRecording:filename=recording.jfr
+-XX:FlightRecorderOptions:stackdepth=128
 ```
