@@ -9,8 +9,33 @@ This project requires Java 11 or later.
 
 Compared to approaches based on `DataSource` an approach based on `JdbcTemplate` has the advantage that it captures a complete database interaction. For example if you process many rows the initial `PreparedStatement#execute()` might be fast but most of the time may be spent in `ResultSet#next()`. A `JdbcTemplate` based approach generates a single JFR event for the entire interaction that involves several JDBC method invocations.
 
+ Spring Class                                                             | JFR Class                                                              |
+|-------------------------------------------------------------------------|------------------------------------------------------------------------|
+| `org.springframework.jdbc.core.JdbcOperations`                          | `com.github.marschall.jfrjdbctemplate.JfrJdbcOperations`               |
+| `org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations` | `com.github.marschall.jfrjdbctemplate.JfrNamedParameterJdbcOperations` |
+
 Usage
 -----
+
+```java
+@Configuration
+public class JdbcConfiguration {
+
+   @Autowired
+   private DataSource dataSource;
+
+   @Bean
+   public JdbcOperations jdbcOperations() {
+     return new JfrJdbcOperations(new JdbcTemplate(this.dataSource));
+   }
+
+   @Bean
+   public NamedParameterJdbcOperations namedParameterJdbcOperations() {
+     return new JfrNamedParameterJdbcOperations(new NamedParameterJdbcTemplate(this.jdbcOperations()));
+   }
+
+}
+```
 
 You need something like the following JVM options to run Flight Recorder
 
