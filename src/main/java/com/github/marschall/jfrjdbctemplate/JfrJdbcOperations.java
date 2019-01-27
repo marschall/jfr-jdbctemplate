@@ -30,6 +30,7 @@ import jdk.jfr.Label;
 
 /**
  * An implementation of {@link JdbcOperations} that generates JFR events.
+ * The events are generated in the "JDBC" category.
  */
 public final class JfrJdbcOperations implements JdbcOperations {
 
