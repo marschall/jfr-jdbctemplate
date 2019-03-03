@@ -15,24 +15,27 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
-import com.github.marschall.jfrjdbctemplate.JfrJdbcOperations.JdbcEvent;
+import jdk.jfr.Category;
+import jdk.jfr.Description;
+import jdk.jfr.Event;
+import jdk.jfr.Label;
 /**
  * An implementation of {@link NamedParameterJdbcOperations} that generates JFR events.
- * The events are generated in the "JDBC" category.
+ * The events are generated in the {@value JdbcNamedEvent#CATEGORY} category.
  */
 public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbcOperations {
 
   private final NamedParameterJdbcOperations delegate;
 
   /**
-   * Constructs a new {@link JfrNamedParameterJdbcOperations} instance
+   * Constructs a new {@link JfrNamedParameterJdbcOperations} instance.
    *
    * <p>In order to have events generated for the methods invoked on the object
    * returned by {@link #getJdbcOperations()} make sure you use the
    * {@link NamedParameterJdbcTemplate#NamedParameterJdbcTemplate(JdbcOperations)}
    * constructor with a {@link JfrJdbcOperations} object.</p>
    *
-   * @param delegate the actual {@link JdbcOperations} implementation
+   * @param delegate the actual {@link JdbcOperations} implementation, not {@code null}
    */
   public JfrNamedParameterJdbcOperations(NamedParameterJdbcOperations delegate) {
     Objects.requireNonNull(delegate, "delegate");
@@ -46,7 +49,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public <T> T execute(String sql, SqlParameterSource paramSource, PreparedStatementCallback<T> action) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("execute");
     event.setQuery(sql);
     event.begin();
@@ -60,7 +63,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public <T> T execute(String sql, Map<String, ?> paramMap, PreparedStatementCallback<T> action) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("execute");
     event.setQuery(sql);
     event.begin();
@@ -74,7 +77,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public <T> T execute(String sql, PreparedStatementCallback<T> action) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("execute");
     event.setQuery(sql);
     event.begin();
@@ -88,7 +91,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public <T> T query(String sql, SqlParameterSource paramSource, ResultSetExtractor<T> rse) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
@@ -102,7 +105,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public <T> T query(String sql, Map<String, ?> paramMap, ResultSetExtractor<T> rse) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
@@ -116,7 +119,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public <T> T query(String sql, ResultSetExtractor<T> rse) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
@@ -130,7 +133,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public void query(String sql, SqlParameterSource paramSource, RowCallbackHandler rch) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
@@ -144,7 +147,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public void query(String sql, Map<String, ?> paramMap, RowCallbackHandler rch) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
@@ -158,7 +161,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public void query(String sql, RowCallbackHandler rch) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
@@ -172,7 +175,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public <T> List<T> query(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
@@ -186,7 +189,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public <T> List<T> query(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
@@ -200,7 +203,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public <T> List<T> query(String sql, RowMapper<T> rowMapper) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
@@ -214,7 +217,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public <T> T queryForObject(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("queryForObject");
     event.setQuery(sql);
     event.begin();
@@ -228,7 +231,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public <T> T queryForObject(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("queryForObject");
     event.setQuery(sql);
     event.begin();
@@ -242,7 +245,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public <T> T queryForObject(String sql, SqlParameterSource paramSource, Class<T> requiredType) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("queryForObject");
     event.setQuery(sql);
     event.begin();
@@ -256,7 +259,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public <T> T queryForObject(String sql, Map<String, ?> paramMap, Class<T> requiredType) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("queryForObject");
     event.setQuery(sql);
     event.begin();
@@ -270,7 +273,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public Map<String, Object> queryForMap(String sql, SqlParameterSource paramSource) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("queryForMap");
     event.setQuery(sql);
     event.begin();
@@ -284,7 +287,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public Map<String, Object> queryForMap(String sql, Map<String, ?> paramMap) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("queryForMap");
     event.setQuery(sql);
     event.begin();
@@ -298,7 +301,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public <T> List<T> queryForList(String sql, SqlParameterSource paramSource, Class<T> elementType) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("queryForList");
     event.setQuery(sql);
     event.begin();
@@ -312,7 +315,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public <T> List<T> queryForList(String sql, Map<String, ?> paramMap, Class<T> elementType) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("queryForList");
     event.setQuery(sql);
     event.begin();
@@ -326,7 +329,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public List<Map<String, Object>> queryForList(String sql, SqlParameterSource paramSource) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("queryForList");
     event.setQuery(sql);
     event.begin();
@@ -340,7 +343,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public List<Map<String, Object>> queryForList(String sql, Map<String, ?> paramMap) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("queryForList");
     event.setQuery(sql);
     event.begin();
@@ -354,7 +357,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public SqlRowSet queryForRowSet(String sql, SqlParameterSource paramSource) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("queryForRowSet");
     event.setQuery(sql);
     event.begin();
@@ -368,7 +371,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public SqlRowSet queryForRowSet(String sql, Map<String, ?> paramMap) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("queryForRowSet");
     event.setQuery(sql);
     event.begin();
@@ -382,7 +385,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public int update(String sql, SqlParameterSource paramSource) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("update");
     event.setQuery(sql);
     event.begin();
@@ -396,7 +399,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public int update(String sql, Map<String, ?> paramMap) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("update");
     event.setQuery(sql);
     event.begin();
@@ -410,7 +413,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public int update(String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("update");
     event.setQuery(sql);
     event.begin();
@@ -424,7 +427,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public int update(String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder, String[] keyColumnNames) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("update");
     event.setQuery(sql);
     event.begin();
@@ -438,7 +441,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public int[] batchUpdate(String sql, Map<String, ?>[] batchValues) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("batchUpdate");
     event.setQuery(sql);
     event.begin();
@@ -452,7 +455,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Override
   public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs) {
-    var event = new JdbcEvent();
+    var event = new JdbcNamedEvent();
     event.setOperationName("batchUpdate");
     event.setQuery(sql);
     event.begin();
@@ -462,6 +465,39 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
       event.end();
       event.commit();
     }
+  }
+
+  @Label("Named Operation")
+  @Description("A named JDBC Operation")
+  @Category(JdbcNamedEvent.CATEGORY)
+  static class JdbcNamedEvent extends Event {
+
+    static final String CATEGORY = "Spring JDBC";
+
+    @Label("Operation Name")
+    @Description("The name of the JDBC operation")
+    private String operationName;
+
+    @Label("Query")
+    @Description("The SQL query string")
+    private String query;
+
+    String getOperationName() {
+      return this.operationName;
+    }
+
+    void setOperationName(String operationName) {
+      this.operationName = operationName;
+    }
+
+    String getQuery() {
+      return this.query;
+    }
+
+    void setQuery(String query) {
+      this.query = query;
+    }
+
   }
 
 }

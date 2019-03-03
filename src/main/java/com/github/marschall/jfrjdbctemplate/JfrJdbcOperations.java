@@ -30,7 +30,7 @@ import jdk.jfr.Label;
 
 /**
  * An implementation of {@link JdbcOperations} that generates JFR events.
- * The events are generated in the "JDBC" category.
+ * The events are generated in the {@value JdbcEvent#CATEGORY} category.
  */
 public final class JfrJdbcOperations implements JdbcOperations {
 
@@ -42,7 +42,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
   /**
    * Constructs a new {@link JfrJdbcOperations}.
    * 
-   * @param delegate the actual {@link JdbcOperations} implementation
+   * @param delegate the actual {@link JdbcOperations} implementation, not {@code null}
    */
   public JfrJdbcOperations(JdbcOperations delegate) {
     Objects.requireNonNull(delegate, "delegate");
@@ -870,10 +870,12 @@ public final class JfrJdbcOperations implements JdbcOperations {
     return null;
   }
 
-  @Label("JDBC Operation")
+  @Label("Operation")
   @Description("A JDBC Operation")
-  @Category("JDBC")
+  @Category(JdbcEvent.SPRING_JDBC)
   static class JdbcEvent extends Event {
+
+    static final String SPRING_JDBC = "Spring JDBC";
 
     @Label("Operation Name")
     @Description("The name of the JDBC operation")
