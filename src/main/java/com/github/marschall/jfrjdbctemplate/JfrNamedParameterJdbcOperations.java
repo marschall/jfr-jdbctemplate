@@ -21,7 +21,7 @@ import jdk.jfr.Event;
 import jdk.jfr.Label;
 /**
  * An implementation of {@link NamedParameterJdbcOperations} that generates JFR events.
- * The events are generated in the {@value JdbcNamedEvent#CATEGORY} category.
+ * The events are generated in the {@value JfrConstants#CATEGORY} category.
  */
 public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbcOperations {
 
@@ -469,10 +469,8 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
 
   @Label("Named Operation")
   @Description("A named JDBC Operation")
-  @Category(JdbcNamedEvent.CATEGORY)
+  @Category(JfrConstants.CATEGORY)
   static class JdbcNamedEvent extends Event {
-
-    static final String CATEGORY = "Spring JDBC";
 
     @Label("Operation Name")
     @Description("The name of the JDBC operation")
