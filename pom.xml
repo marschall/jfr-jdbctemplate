@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.marschall</groupId>
   <artifactId>jfr-jdbctemplate</artifactId>
-  <version>0.3.0-SNAPSHOT</version>
+  <version>0.3.0</version>
   <inceptionYear>2018</inceptionYear>
   <name>JFR JdbcTemplate</name>
   <description>A JdbcTemplate that generates JFR events.</description>
@@ -18,7 +18,7 @@
     <connection>scm:git:git@github.com:marschall/jfr-jdbctemplate.git</connection>
     <developerConnection>scm:git:git@github.com:marschall/jfr-jdbctemplate.git</developerConnection>
     <url>${project.url}</url>
-    <tag>HEAD</tag>
+    <tag>0.3.0</tag>
   </scm>
 
   <developers>
