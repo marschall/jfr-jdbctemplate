@@ -1,5 +1,6 @@
 package com.github.marschall.jfrjdbctemplate;
 
+import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -51,12 +52,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> T execute(ConnectionCallback<T> action) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("execute");
     event.setQuery(getSql(action));
     event.begin();
     try {
-      return this.delegate.execute(action);
+      T result = this.delegate.execute(action);
+      setResultSize(event, result);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -65,12 +68,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> T execute(StatementCallback<T> action) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("execute");
     event.setQuery(getSql(action));
     event.begin();
     try {
-      return this.delegate.execute(action);
+      T result = this.delegate.execute(action);
+      setResultSize(event, result);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -79,7 +84,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public void execute(String sql) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("execute");
     event.setQuery(sql);
     event.begin();
@@ -93,12 +98,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> T query(String sql, ResultSetExtractor<T> rse) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.query(sql, rse);
+      T result = this.delegate.query(sql, rse);
+      setResultSize(event, result);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -107,7 +114,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public void query(String sql, RowCallbackHandler rch) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
@@ -121,12 +128,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> List<T> query(String sql, RowMapper<T> rowMapper) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.query(sql, rowMapper);
+      List<T> result = this.delegate.query(sql, rowMapper);
+      event.setResultSize(result.size());
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -135,12 +144,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> T queryForObject(String sql, RowMapper<T> rowMapper) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForObject");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForObject(sql, rowMapper);
+      T result = this.delegate.queryForObject(sql, rowMapper);
+      event.setResultSize(1);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -149,12 +160,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> T queryForObject(String sql, Class<T> requiredType) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForObject");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForObject(sql, requiredType);
+      T result = this.delegate.queryForObject(sql, requiredType);
+      event.setResultSize(1);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -163,12 +176,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public Map<String, Object> queryForMap(String sql) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForMap");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForMap(sql);
+      Map<String, Object> result = this.delegate.queryForMap(sql);
+      event.setResultSize(result.size());
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -177,12 +192,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> List<T> queryForList(String sql, Class<T> elementType) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForList");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForList(sql, elementType);
+      List<T> result = this.delegate.queryForList(sql, elementType);
+      event.setResultSize(result.size());
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -191,12 +208,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public List<Map<String, Object>> queryForList(String sql) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForList");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForList(sql);
+      List<Map<String, Object>> result = this.delegate.queryForList(sql);
+      event.setResultSize(result.size());
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -205,7 +224,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public SqlRowSet queryForRowSet(String sql) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForRowSet");
     event.setQuery(sql);
     event.begin();
@@ -219,7 +238,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public int update(String sql) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("update");
     event.setQuery(sql);
     event.begin();
@@ -233,7 +252,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public int[] batchUpdate(String... sql) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("batchUpdate");
     if ((sql != null) && (sql.length > 0)) {
       event.setQuery(sql[0]);
@@ -249,12 +268,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> T execute(PreparedStatementCreator psc, PreparedStatementCallback<T> action) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("execute");
     event.setQuery(getSql(psc));
     event.begin();
     try {
-      return this.delegate.execute(psc, action);
+      T result = this.delegate.execute(psc, action);
+      setResultSize(event, result);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -263,12 +284,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> T execute(String sql, PreparedStatementCallback<T> action) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("execute");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.execute(sql, action);
+      T result = this.delegate.execute(sql, action);
+      setResultSize(event, result);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -277,12 +300,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> T query(PreparedStatementCreator psc, ResultSetExtractor<T> rse) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(getSql(psc));
     event.begin();
     try {
-      return this.delegate.query(psc, rse);
+      T result = this.delegate.query(psc, rse);
+      setResultSize(event, result);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -291,12 +316,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> T query(String sql, PreparedStatementSetter pss, ResultSetExtractor<T> rse) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.query(sql, pss, rse);
+      T result = this.delegate.query(sql, pss, rse);
+      setResultSize(event, result);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -305,12 +332,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> T query(String sql, Object[] args, int[] argTypes, ResultSetExtractor<T> rse) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.query(sql, args, argTypes, rse);
+      T result = this.delegate.query(sql, args, argTypes, rse);
+      setResultSize(event, result);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -319,12 +348,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> T query(String sql, Object[] args, ResultSetExtractor<T> rse) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.query(sql, args, rse);
+      T result = this.delegate.query(sql, args, rse);
+      setResultSize(event, result);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -333,12 +364,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> T query(String sql, ResultSetExtractor<T> rse, Object... args) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.query(sql, rse, args);
+      T result = this.delegate.query(sql, rse, args);
+      setResultSize(event, result);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -347,7 +380,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public void query(PreparedStatementCreator psc, RowCallbackHandler rch) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(getSql(psc));
     event.begin();
@@ -361,7 +394,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public void query(String sql, PreparedStatementSetter pss, RowCallbackHandler rch) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
@@ -375,7 +408,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public void query(String sql, Object[] args, int[] argTypes, RowCallbackHandler rch) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
@@ -403,7 +436,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public void query(String sql, RowCallbackHandler rch, Object... args) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
@@ -417,12 +450,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> List<T> query(PreparedStatementCreator psc, RowMapper<T> rowMapper) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(getSql(psc));
     event.begin();
     try {
-      return this.delegate.query(psc, rowMapper);
+      List<T> result = this.delegate.query(psc, rowMapper);
+      event.setResultSize(result.size());
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -431,12 +466,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> List<T> query(String sql, PreparedStatementSetter pss, RowMapper<T> rowMapper) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.query(sql, pss, rowMapper);
+      List<T> result = this.delegate.query(sql, pss, rowMapper);
+      event.setResultSize(result.size());
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -445,12 +482,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> List<T> query(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.query(sql, args, argTypes, rowMapper);
+      List<T> result = this.delegate.query(sql, args, argTypes, rowMapper);
+      event.setResultSize(result.size());
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -459,12 +498,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.query(sql, args, rowMapper);
+      List<T> result = this.delegate.query(sql, args, rowMapper);
+      event.setResultSize(result.size());
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -473,12 +514,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> List<T> query(String sql, RowMapper<T> rowMapper, Object... args) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.query(sql, rowMapper, args);
+      List<T> result = this.delegate.query(sql, rowMapper, args);
+      event.setResultSize(result.size());
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -487,12 +530,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> T queryForObject(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForObject");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForObject(sql, args, argTypes, rowMapper);
+      T result = this.delegate.queryForObject(sql, args, argTypes, rowMapper);
+      event.setResultSize(1);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -501,12 +546,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> T queryForObject(String sql, Object[] args, RowMapper<T> rowMapper) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForObject");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForObject(sql, args, rowMapper);
+      T result = this.delegate.queryForObject(sql, args, rowMapper);
+      event.setResultSize(1);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -515,12 +562,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> T queryForObject(String sql, RowMapper<T> rowMapper, Object... args) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForObject");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForObject(sql, rowMapper, args);
+      T result = this.delegate.queryForObject(sql, rowMapper, args);
+      event.setResultSize(1);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -529,12 +578,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> T queryForObject(String sql, Object[] args, int[] argTypes, Class<T> requiredType) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForObject");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForObject(sql, args, argTypes, requiredType);
+      T result = this.delegate.queryForObject(sql, args, argTypes, requiredType);
+      event.setResultSize(1);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -543,12 +594,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> T queryForObject(String sql, Object[] args, Class<T> requiredType) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForObject");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForObject(sql, args, requiredType);
+      T result = this.delegate.queryForObject(sql, args, requiredType);
+      event.setResultSize(1);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -557,12 +610,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> T queryForObject(String sql, Class<T> requiredType, Object... args) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForObject");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForObject(sql, requiredType, args);
+      T result = this.delegate.queryForObject(sql, requiredType, args);
+      event.setResultSize(1);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -571,12 +626,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public Map<String, Object> queryForMap(String sql, Object[] args, int[] argTypes) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForMap");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForMap(sql, args, argTypes);
+      Map<String, Object> result = this.delegate.queryForMap(sql, args, argTypes);
+      event.setResultSize(result.size());
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -585,12 +642,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public Map<String, Object> queryForMap(String sql, Object... args) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForMap");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForMap(sql, args);
+      Map<String, Object> result = this.delegate.queryForMap(sql, args);
+      event.setResultSize(result.size());
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -599,12 +658,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> List<T> queryForList(String sql, Object[] args, int[] argTypes, Class<T> elementType) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForList");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForList(sql, args, argTypes, elementType);
+      List<T> result = this.delegate.queryForList(sql, args, argTypes, elementType);
+      event.setResultSize(result.size());
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -613,12 +674,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> List<T> queryForList(String sql, Object[] args, Class<T> elementType) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForList");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForList(sql, args, elementType);
+      List<T> result = this.delegate.queryForList(sql, args, elementType);
+      event.setResultSize(result.size());
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -627,12 +690,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> List<T> queryForList(String sql, Class<T> elementType, Object... args) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForList");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForList(sql, elementType, args);
+      List<T> result = this.delegate.queryForList(sql, elementType, args);
+      event.setResultSize(result.size());
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -641,12 +706,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public List<Map<String, Object>> queryForList(String sql, Object[] args, int[] argTypes) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForList");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForList(sql, args, argTypes);
+      List<Map<String, Object>> result = this.delegate.queryForList(sql, args, argTypes);
+      event.setResultSize(result.size());
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -655,12 +722,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public List<Map<String, Object>> queryForList(String sql, Object... args) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForList");
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForList(sql, args);
+      List<Map<String, Object>> result = this.delegate.queryForList(sql, args);
+      event.setResultSize(result.size());
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -669,7 +738,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public SqlRowSet queryForRowSet(String sql, Object[] args, int[] argTypes) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForRowSet");
     event.setQuery(sql);
     event.begin();
@@ -683,7 +752,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public SqlRowSet queryForRowSet(String sql, Object... args) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForRowSet");
     event.setQuery(sql);
     event.begin();
@@ -697,7 +766,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public int update(PreparedStatementCreator psc) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("update");
     event.setQuery(getSql(psc));
     event.begin();
@@ -711,7 +780,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public int update(PreparedStatementCreator psc, KeyHolder generatedKeyHolder) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("update");
     event.setQuery(getSql(generatedKeyHolder));
     event.begin();
@@ -725,7 +794,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public int update(String sql, PreparedStatementSetter pss) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("update");
     event.setQuery(sql);
     event.begin();
@@ -739,7 +808,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public int update(String sql, Object[] args, int[] argTypes) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("update");
     event.setQuery(sql);
     event.begin();
@@ -753,7 +822,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public int update(String sql, Object... args) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("update");
     event.setQuery(sql);
     event.begin();
@@ -767,7 +836,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public int[] batchUpdate(String sql, BatchPreparedStatementSetter pss) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("batchUpdate");
     event.setQuery(sql);
     event.begin();
@@ -781,7 +850,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public int[] batchUpdate(String sql, List<Object[]> batchArgs) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("batchUpdate");
     event.setQuery(sql);
     event.begin();
@@ -795,7 +864,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("batchUpdate");
     event.setQuery(sql);
     event.begin();
@@ -809,7 +878,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> int[][] batchUpdate(String sql, Collection<T> batchArgs, int batchSize, ParameterizedPreparedStatementSetter<T> pss) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("batchUpdate");
     event.setQuery(sql);
     event.begin();
@@ -823,12 +892,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> T execute(CallableStatementCreator csc, CallableStatementCallback<T> action) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("execute");
     event.setQuery(getSql(csc));
     event.begin();
     try {
-      return this.delegate.execute(csc, action);
+      T result = this.delegate.execute(csc, action);
+      setResultSize(event, result);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -837,12 +908,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public <T> T execute(String callString, CallableStatementCallback<T> action) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("execute");
     event.setQuery(callString);
     event.begin();
     try {
-      return this.delegate.execute(callString, action);
+      T result = this.delegate.execute(callString, action);
+      setResultSize(event, result);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -851,12 +924,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public Map<String, Object> call(CallableStatementCreator csc, List<SqlParameter> declaredParameters) {
-    var event = new JdbcEvent();
+    JdbcEvent event = new JdbcEvent();
     event.setOperationName("batchUpdate");
     event.setQuery(getSql(csc));
     event.begin();
     try {
-      return this.delegate.call(csc, declaredParameters);
+      Map<String, Object> result = this.delegate.call(csc, declaredParameters);
+      event.setResultSize(result.size());
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -868,6 +943,30 @@ public final class JfrJdbcOperations implements JdbcOperations {
       return ((SqlProvider) o).getSql();
     }
     return null;
+  }
+
+
+  private static void setResultSize(JdbcEvent event, Object o) {
+    int size = getSize(o);
+    if (size != -1) {
+      event.setResultSize(size);
+    }
+  }
+  
+  private static int getSize(Object o) {
+    if (o == null) {
+      return -1;
+    }
+    if (o instanceof Collection) {
+      return ((Collection<?>) o).size();
+    }
+    if (o instanceof Map) {
+      return ((Map<?, ?>) o).size();
+    }
+    if (o.getClass().isArray()) {
+      return Array.getLength(o);
+    }
+    return -1;
   }
 
   @Label("Operation")
@@ -882,6 +981,10 @@ public final class JfrJdbcOperations implements JdbcOperations {
     @Label("Query")
     @Description("The SQL query string")
     private String query;
+    
+    @Label("Result Size")
+    @Description("The number of rows returned")
+    private int resultSize;
 
     String getOperationName() {
       return this.operationName;
@@ -897,6 +1000,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
     void setQuery(String query) {
       this.query = query;
+    }
+
+    int getResultSize() {
+      return resultSize;
+    }
+
+    void setResultSize(int resultSize) {
+      this.resultSize = resultSize;
     }
 
   }
