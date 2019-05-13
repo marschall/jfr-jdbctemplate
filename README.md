@@ -31,7 +31,7 @@ Reported Attributes
 <dt>query</dt>
 <dd>The SQL query string passed to the JDBC driver. May be missing especially if custom <code>org.springframework.jdbc.core.PreparedStatementCreator</code> fail to implement <code>org.springframework.jdbc.core.SqlProvider</code>.</dd>
 <dt>rowCount</dt>
-<dd>In the case of a SELECT the number of rows returned. In the case of an UPDATE or DELETE the number of rows affected. -1 for a statement that does not return anything like a DDL. -2 when no information about the number of rows is available.</dd>
+<dd>In the case of a <code>SELECT</code> the number of rows returned. In the case of an <code>UPDATE</code> or <code>DELETE</code> the number of rows affected. <code>-1</code> for a statement that does not return anything like a DDL. <code>-2</code> when no information about the number of rows is available.</dd>
 </dl>
 
 Usage
