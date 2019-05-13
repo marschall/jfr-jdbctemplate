@@ -1,6 +1,5 @@
 package com.github.marschall.jfrjdbctemplate;
 
-import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.List;
@@ -994,44 +993,44 @@ public final class JfrJdbcOperations implements JdbcOperations {
   @Description("A JDBC Operation")
   @Category(JfrConstants.CATEGORY)
   static class JdbcEvent extends Event {
-  
+
     @Label("Operation Name")
     @Description("The name of the JDBC operation")
     private String operationName;
-  
+
     @Label("Query")
     @Description("The SQL query string")
     private String query;
-  
-    @Label("Row count")
+
+    @Label("Row Count")
     @Description("The number of rows returned or updated")
     // long instead of int to avoid overflows for batch updates
     private long rowCount;
-  
+
     String getOperationName() {
       return this.operationName;
     }
-  
+
     void setOperationName(String operationName) {
       this.operationName = operationName;
     }
-  
+
     String getQuery() {
       return this.query;
     }
-  
+
     void setQuery(String query) {
       this.query = query;
     }
-  
+
     long getRowCount() {
-      return rowCount;
+      return this.rowCount;
     }
-  
+
     void setRowCount(long resultSize) {
       this.rowCount = resultSize;
     }
-  
+
   }
 
 }

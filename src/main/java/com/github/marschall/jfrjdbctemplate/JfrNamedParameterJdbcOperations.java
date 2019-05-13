@@ -16,8 +16,6 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
-import com.github.marschall.jfrjdbctemplate.JfrJdbcOperations.JdbcEvent;
-
 import jdk.jfr.Category;
 import jdk.jfr.Description;
 import jdk.jfr.Event;
@@ -549,7 +547,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
     @Description("The SQL query string")
     private String query;
 
-    @Label("Row count")
+    @Label("Row Count")
     @Description("The number of rows returned or updated")
     // long instead of int to avoid overflows for batch updates
     private long rowCount;
@@ -571,7 +569,7 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
     }
 
     long getRowCount() {
-      return rowCount;
+      return this.rowCount;
     }
 
     void setRowCount(long resultSize) {
