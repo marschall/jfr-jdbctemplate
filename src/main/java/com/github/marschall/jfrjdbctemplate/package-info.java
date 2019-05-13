@@ -23,6 +23,6 @@
  * </table>
  *
  * <h2>Screenshot</h2>
- * <img src="{@docRoot}/resources/Screenshot%20from%2019-05-13%21-09-33.png" alt="Java Flight Recoder Screenshot">
+ * <img src="{@docRoot}/resources/Screenshot%20from%202019-05-13%2021-09-33.png" alt="Java Flight Recoder Screenshot">
  */
 package com.github.marschall.jfrjdbctemplate;
