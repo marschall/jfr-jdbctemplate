@@ -1,6 +1,8 @@
 package com.github.marschall.jfrjdbctemplate;
 
 import java.lang.reflect.Array;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +40,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
   // http://hirt.se/blog/?p=870
   // https://www.oracle.com/technetwork/oem/soa-mgmt/con10912-javaflightrecorder-2342054.pdf
 
+  private static final int NO_ROWS = -1;
   private final JdbcOperations delegate;
 
   /**
@@ -58,7 +61,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.execute(action);
-      setResultSize(event, result);
+      setRowCount(event, result);
       return result;
     } finally {
       event.end();
@@ -70,11 +73,10 @@ public final class JfrJdbcOperations implements JdbcOperations {
   public <T> T execute(StatementCallback<T> action) {
     JdbcEvent event = new JdbcEvent();
     event.setOperationName("execute");
-    event.setQuery(getSql(action));
     event.begin();
     try {
       T result = this.delegate.execute(action);
-      setResultSize(event, result);
+      setRowCount(event, result);
       return result;
     } finally {
       event.end();
@@ -90,6 +92,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       this.delegate.execute(sql);
+      event.setRowCount(NO_ROWS);
     } finally {
       event.end();
       event.commit();
@@ -104,7 +107,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.query(sql, rse);
-      setResultSize(event, result);
+      setRowCount(event, result);
       return result;
     } finally {
       event.end();
@@ -120,6 +123,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       this.delegate.query(sql, rch);
+      event.setRowCount(Statement.SUCCESS_NO_INFO);
     } finally {
       event.end();
       event.commit();
@@ -134,7 +138,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       List<T> result = this.delegate.query(sql, rowMapper);
-      event.setResultSize(result.size());
+      event.setRowCount(result.size());
       return result;
     } finally {
       event.end();
@@ -150,7 +154,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.queryForObject(sql, rowMapper);
-      event.setResultSize(1);
+      event.setRowCount(1);
       return result;
     } finally {
       event.end();
@@ -166,7 +170,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.queryForObject(sql, requiredType);
-      event.setResultSize(1);
+      event.setRowCount(1);
       return result;
     } finally {
       event.end();
@@ -182,7 +186,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       Map<String, Object> result = this.delegate.queryForMap(sql);
-      event.setResultSize(result.size());
+      event.setRowCount(result.size());
       return result;
     } finally {
       event.end();
@@ -198,7 +202,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       List<T> result = this.delegate.queryForList(sql, elementType);
-      event.setResultSize(result.size());
+      event.setRowCount(result.size());
       return result;
     } finally {
       event.end();
@@ -214,7 +218,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       List<Map<String, Object>> result = this.delegate.queryForList(sql);
-      event.setResultSize(result.size());
+      event.setRowCount(result.size());
       return result;
     } finally {
       event.end();
@@ -229,7 +233,9 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForRowSet(sql);
+      SqlRowSet result = this.delegate.queryForRowSet(sql);
+      event.setRowCount(Statement.SUCCESS_NO_INFO);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -243,7 +249,9 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.update(sql);
+      int updateCount = this.delegate.update(sql);
+      event.setRowCount(updateCount);
+      return updateCount;
     } finally {
       event.end();
       event.commit();
@@ -259,7 +267,9 @@ public final class JfrJdbcOperations implements JdbcOperations {
     }
     event.begin();
     try {
-      return this.delegate.batchUpdate(sql);
+      int[] updateCount = this.delegate.batchUpdate(sql);
+      event.setRowCount(countRows(updateCount));
+      return updateCount;
     } finally {
       event.end();
       event.commit();
@@ -274,7 +284,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.execute(psc, action);
-      setResultSize(event, result);
+      setRowCount(event, result);
       return result;
     } finally {
       event.end();
@@ -290,7 +300,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.execute(sql, action);
-      setResultSize(event, result);
+      setRowCount(event, result);
       return result;
     } finally {
       event.end();
@@ -306,7 +316,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.query(psc, rse);
-      setResultSize(event, result);
+      setRowCount(event, result);
       return result;
     } finally {
       event.end();
@@ -322,7 +332,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.query(sql, pss, rse);
-      setResultSize(event, result);
+      setRowCount(event, result);
       return result;
     } finally {
       event.end();
@@ -338,7 +348,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.query(sql, args, argTypes, rse);
-      setResultSize(event, result);
+      setRowCount(event, result);
       return result;
     } finally {
       event.end();
@@ -354,7 +364,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.query(sql, args, rse);
-      setResultSize(event, result);
+      setRowCount(event, result);
       return result;
     } finally {
       event.end();
@@ -370,7 +380,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.query(sql, rse, args);
-      setResultSize(event, result);
+      setRowCount(event, result);
       return result;
     } finally {
       event.end();
@@ -386,6 +396,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       this.delegate.query(psc, rch);
+      event.setRowCount(Statement.SUCCESS_NO_INFO);
     } finally {
       event.end();
       event.commit();
@@ -400,6 +411,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       this.delegate.query(sql, pss, rch);
+      event.setRowCount(Statement.SUCCESS_NO_INFO);
     } finally {
       event.end();
       event.commit();
@@ -414,6 +426,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       this.delegate.query(sql, args, argTypes, rch);
+      event.setRowCount(Statement.SUCCESS_NO_INFO);
     } finally {
       event.end();
       event.commit();
@@ -422,15 +435,16 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public void query(String sql, Object[] args, RowCallbackHandler rch) {
-    var jdbcEvent = new JdbcEvent();
-    jdbcEvent.setOperationName("query");
-    jdbcEvent.setQuery(sql);
-    jdbcEvent.begin();
+    JdbcEvent event = new JdbcEvent();
+    event.setOperationName("query");
+    event.setQuery(sql);
+    event.begin();
     try {
       this.delegate.query(sql, args, rch);
+      event.setRowCount(Statement.SUCCESS_NO_INFO);
     } finally {
-      jdbcEvent.end();
-      jdbcEvent.commit();
+      event.end();
+      event.commit();
     }
   }
 
@@ -442,6 +456,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       this.delegate.query(sql, rch, args);
+      event.setRowCount(Statement.SUCCESS_NO_INFO);
     } finally {
       event.end();
       event.commit();
@@ -456,7 +471,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       List<T> result = this.delegate.query(psc, rowMapper);
-      event.setResultSize(result.size());
+      event.setRowCount(result.size());
       return result;
     } finally {
       event.end();
@@ -472,7 +487,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       List<T> result = this.delegate.query(sql, pss, rowMapper);
-      event.setResultSize(result.size());
+      event.setRowCount(result.size());
       return result;
     } finally {
       event.end();
@@ -488,7 +503,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       List<T> result = this.delegate.query(sql, args, argTypes, rowMapper);
-      event.setResultSize(result.size());
+      event.setRowCount(result.size());
       return result;
     } finally {
       event.end();
@@ -504,7 +519,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       List<T> result = this.delegate.query(sql, args, rowMapper);
-      event.setResultSize(result.size());
+      event.setRowCount(result.size());
       return result;
     } finally {
       event.end();
@@ -520,7 +535,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       List<T> result = this.delegate.query(sql, rowMapper, args);
-      event.setResultSize(result.size());
+      event.setRowCount(result.size());
       return result;
     } finally {
       event.end();
@@ -536,7 +551,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.queryForObject(sql, args, argTypes, rowMapper);
-      event.setResultSize(1);
+      event.setRowCount(1);
       return result;
     } finally {
       event.end();
@@ -552,7 +567,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.queryForObject(sql, args, rowMapper);
-      event.setResultSize(1);
+      event.setRowCount(1);
       return result;
     } finally {
       event.end();
@@ -568,7 +583,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.queryForObject(sql, rowMapper, args);
-      event.setResultSize(1);
+      event.setRowCount(1);
       return result;
     } finally {
       event.end();
@@ -584,7 +599,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.queryForObject(sql, args, argTypes, requiredType);
-      event.setResultSize(1);
+      event.setRowCount(1);
       return result;
     } finally {
       event.end();
@@ -600,7 +615,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.queryForObject(sql, args, requiredType);
-      event.setResultSize(1);
+      event.setRowCount(1);
       return result;
     } finally {
       event.end();
@@ -616,7 +631,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.queryForObject(sql, requiredType, args);
-      event.setResultSize(1);
+      event.setRowCount(1);
       return result;
     } finally {
       event.end();
@@ -632,7 +647,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       Map<String, Object> result = this.delegate.queryForMap(sql, args, argTypes);
-      event.setResultSize(result.size());
+      event.setRowCount(result.size());
       return result;
     } finally {
       event.end();
@@ -648,7 +663,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       Map<String, Object> result = this.delegate.queryForMap(sql, args);
-      event.setResultSize(result.size());
+      event.setRowCount(result.size());
       return result;
     } finally {
       event.end();
@@ -664,7 +679,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       List<T> result = this.delegate.queryForList(sql, args, argTypes, elementType);
-      event.setResultSize(result.size());
+      event.setRowCount(result.size());
       return result;
     } finally {
       event.end();
@@ -680,7 +695,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       List<T> result = this.delegate.queryForList(sql, args, elementType);
-      event.setResultSize(result.size());
+      event.setRowCount(result.size());
       return result;
     } finally {
       event.end();
@@ -696,7 +711,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       List<T> result = this.delegate.queryForList(sql, elementType, args);
-      event.setResultSize(result.size());
+      event.setRowCount(result.size());
       return result;
     } finally {
       event.end();
@@ -712,7 +727,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       List<Map<String, Object>> result = this.delegate.queryForList(sql, args, argTypes);
-      event.setResultSize(result.size());
+      event.setRowCount(result.size());
       return result;
     } finally {
       event.end();
@@ -728,7 +743,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       List<Map<String, Object>> result = this.delegate.queryForList(sql, args);
-      event.setResultSize(result.size());
+      event.setRowCount(result.size());
       return result;
     } finally {
       event.end();
@@ -743,7 +758,9 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForRowSet(sql, args, argTypes);
+      SqlRowSet result = this.delegate.queryForRowSet(sql, args, argTypes);
+      event.setRowCount(Statement.SUCCESS_NO_INFO);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -757,7 +774,9 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.queryForRowSet(sql, args);
+      SqlRowSet result = this.delegate.queryForRowSet(sql, args);
+      event.setRowCount(Statement.SUCCESS_NO_INFO);
+      return result;
     } finally {
       event.end();
       event.commit();
@@ -771,7 +790,9 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.setQuery(getSql(psc));
     event.begin();
     try {
-      return this.delegate.update(psc);
+      int updateCount = this.delegate.update(psc);
+      event.setRowCount(updateCount);
+      return updateCount;
     } finally {
       event.end();
       event.commit();
@@ -785,7 +806,9 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.setQuery(getSql(generatedKeyHolder));
     event.begin();
     try {
-      return this.delegate.update(psc, generatedKeyHolder);
+      int updateCount = this.delegate.update(psc, generatedKeyHolder);
+      event.setRowCount(updateCount);
+      return updateCount;
     } finally {
       event.end();
       event.commit();
@@ -799,7 +822,9 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.update(sql, pss);
+      int updateCount = this.delegate.update(sql, pss);
+      event.setRowCount(updateCount);
+      return updateCount;
     } finally {
       event.end();
       event.commit();
@@ -813,7 +838,9 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.update(sql, args, argTypes);
+      int updateCount = this.delegate.update(sql, args, argTypes);
+      event.setRowCount(updateCount);
+      return updateCount;
     } finally {
       event.end();
       event.commit();
@@ -827,7 +854,9 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.update(sql, args);
+      int updateCount = this.delegate.update(sql, args);
+      event.setRowCount(updateCount);
+      return updateCount;
     } finally {
       event.end();
       event.commit();
@@ -841,7 +870,9 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.batchUpdate(sql, pss);
+      int[] updateCount = this.delegate.batchUpdate(sql, pss);
+      event.setRowCount(countRows(updateCount));
+      return updateCount;
     } finally {
       event.end();
       event.commit();
@@ -855,7 +886,9 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.batchUpdate(sql, batchArgs);
+      int[] updateCount = this.delegate.batchUpdate(sql, batchArgs);
+      event.setRowCount(countRows(updateCount));
+      return updateCount;
     } finally {
       event.end();
       event.commit();
@@ -869,7 +902,9 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.batchUpdate(sql, batchArgs, argTypes);
+      int[] updateCount = this.delegate.batchUpdate(sql, batchArgs, argTypes);
+      event.setRowCount(countRows(updateCount));
+      return updateCount;
     } finally {
       event.end();
       event.commit();
@@ -883,7 +918,9 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.setQuery(sql);
     event.begin();
     try {
-      return this.delegate.batchUpdate(sql, batchArgs, batchSize, pss);
+      int[][] updateCount = this.delegate.batchUpdate(sql, batchArgs, batchSize, pss);
+      event.setRowCount(countRows(updateCount));
+      return updateCount;
     } finally {
       event.end();
       event.commit();
@@ -898,7 +935,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.execute(csc, action);
-      setResultSize(event, result);
+      setRowCount(event, result);
       return result;
     } finally {
       event.end();
@@ -914,7 +951,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.execute(callString, action);
-      setResultSize(event, result);
+      setRowCount(event, result);
       return result;
     } finally {
       event.end();
@@ -930,12 +967,35 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       Map<String, Object> result = this.delegate.call(csc, declaredParameters);
-      event.setResultSize(result.size());
+      event.setRowCount(result.size());
       return result;
     } finally {
       event.end();
       event.commit();
     }
+  }
+  
+  private static long countRows(int[][] updateCounts) {
+    long count = 0L;
+    for (int[] updateCount : updateCounts) {
+      long i = countRows(updateCount);
+      if (i == Statement.SUCCESS_NO_INFO) {
+        return Statement.SUCCESS_NO_INFO;
+      }
+      count += i;
+    }
+    return count;
+  }
+
+  private static long countRows(int[] updateCount) {
+    long count = 0L;
+    for (int i : updateCount) {
+      if (i == Statement.SUCCESS_NO_INFO) {
+        return Statement.SUCCESS_NO_INFO;
+      }
+      count += i;
+    }
+    return count;
   }
 
   private static String getSql(Object o) {
@@ -946,13 +1006,15 @@ public final class JfrJdbcOperations implements JdbcOperations {
   }
 
 
-  private static void setResultSize(JdbcEvent event, Object o) {
+  private static void setRowCount(JdbcEvent event, Object o) {
     int size = getSize(o);
     if (size != -1) {
-      event.setResultSize(size);
+      event.setRowCount(size);
+    } else {
+      event.setRowCount(Statement.SUCCESS_NO_INFO);
     }
   }
-  
+
   private static int getSize(Object o) {
     if (o == null) {
       return -1;
@@ -981,10 +1043,11 @@ public final class JfrJdbcOperations implements JdbcOperations {
     @Label("Query")
     @Description("The SQL query string")
     private String query;
-    
-    @Label("Result Size")
-    @Description("The number of rows returned")
-    private int resultSize;
+
+    @Label("Row count")
+    @Description("The number of rows returned or updated")
+    // long instead of int to avoid overflows for batch updates
+    private long rowCount;
 
     String getOperationName() {
       return this.operationName;
@@ -1002,12 +1065,12 @@ public final class JfrJdbcOperations implements JdbcOperations {
       this.query = query;
     }
 
-    int getResultSize() {
-      return resultSize;
+    long getRowCount() {
+      return rowCount;
     }
 
-    void setResultSize(int resultSize) {
-      this.resultSize = resultSize;
+    void setRowCount(long resultSize) {
+      this.rowCount = resultSize;
     }
 
   }

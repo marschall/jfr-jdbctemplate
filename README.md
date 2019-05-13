@@ -23,6 +23,17 @@ Compared to approaches based on `DataSource` an approach based on `JdbcTemplate`
 | `org.springframework.jdbc.core.JdbcOperations`                          | `com.github.marschall.jfrjdbctemplate.JfrJdbcOperations`               |
 | `org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations` | `com.github.marschall.jfrjdbctemplate.JfrNamedParameterJdbcOperations` |
 
+Reported Attributes
+-------------------
+<dl>
+<dt>operationName</dt>
+<dd>The name of the execute JDBC operation, this corresponds to the method name on <code>JdbcOperations</code>/<code>JdbcTemplate</code>.</dd>
+<dt>query</dt>
+<dd>The SQL query string passed to the JDBC driver. May be missing especially if custom <code>org.springframework.jdbc.core.PreparedStatementCreator</code> fail to implement <code>org.springframework.jdbc.core.SqlProvider</code>.</dd>
+<dt>rowCount</dt>
+<dd>In the case of a SELECT the number of rows returned. In the case of an UPDATE or DELETE the number of rows affected. -1 for a statement that does not return anything like a DDL. -2 when no information about the number of rows is available.</dd>
+</dl>
+
 Usage
 -----
 
