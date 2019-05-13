@@ -1,6 +1,5 @@
 package com.github.marschall.jfrjdbctemplate;
 
-import java.lang.reflect.Array;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Collection;
@@ -154,7 +153,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.queryForObject(sql, rowMapper);
-      event.setRowCount(1);
+      event.setRowCount(1L);
       return result;
     } finally {
       event.end();
@@ -170,7 +169,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.queryForObject(sql, requiredType);
-      event.setRowCount(1);
+      event.setRowCount(1L);
       return result;
     } finally {
       event.end();
@@ -268,7 +267,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       int[] updateCount = this.delegate.batchUpdate(sql);
-      event.setRowCount(countRows(updateCount));
+      event.setRowCount(RowCountingUtil.countRows(updateCount));
       return updateCount;
     } finally {
       event.end();
@@ -551,7 +550,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.queryForObject(sql, args, argTypes, rowMapper);
-      event.setRowCount(1);
+      event.setRowCount(1L);
       return result;
     } finally {
       event.end();
@@ -567,7 +566,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.queryForObject(sql, args, rowMapper);
-      event.setRowCount(1);
+      event.setRowCount(1L);
       return result;
     } finally {
       event.end();
@@ -583,7 +582,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.queryForObject(sql, rowMapper, args);
-      event.setRowCount(1);
+      event.setRowCount(1L);
       return result;
     } finally {
       event.end();
@@ -599,7 +598,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.queryForObject(sql, args, argTypes, requiredType);
-      event.setRowCount(1);
+      event.setRowCount(1L);
       return result;
     } finally {
       event.end();
@@ -615,7 +614,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.queryForObject(sql, args, requiredType);
-      event.setRowCount(1);
+      event.setRowCount(1L);
       return result;
     } finally {
       event.end();
@@ -631,7 +630,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       T result = this.delegate.queryForObject(sql, requiredType, args);
-      event.setRowCount(1);
+      event.setRowCount(1L);
       return result;
     } finally {
       event.end();
@@ -871,7 +870,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       int[] updateCount = this.delegate.batchUpdate(sql, pss);
-      event.setRowCount(countRows(updateCount));
+      event.setRowCount(RowCountingUtil.countRows(updateCount));
       return updateCount;
     } finally {
       event.end();
@@ -887,7 +886,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       int[] updateCount = this.delegate.batchUpdate(sql, batchArgs);
-      event.setRowCount(countRows(updateCount));
+      event.setRowCount(RowCountingUtil.countRows(updateCount));
       return updateCount;
     } finally {
       event.end();
@@ -903,7 +902,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       int[] updateCount = this.delegate.batchUpdate(sql, batchArgs, argTypes);
-      event.setRowCount(countRows(updateCount));
+      event.setRowCount(RowCountingUtil.countRows(updateCount));
       return updateCount;
     } finally {
       event.end();
@@ -919,7 +918,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.begin();
     try {
       int[][] updateCount = this.delegate.batchUpdate(sql, batchArgs, batchSize, pss);
-      event.setRowCount(countRows(updateCount));
+      event.setRowCount(RowCountingUtil.countRows(updateCount));
       return updateCount;
     } finally {
       event.end();
@@ -974,29 +973,6 @@ public final class JfrJdbcOperations implements JdbcOperations {
       event.commit();
     }
   }
-  
-  private static long countRows(int[][] updateCounts) {
-    long count = 0L;
-    for (int[] updateCount : updateCounts) {
-      long i = countRows(updateCount);
-      if (i == Statement.SUCCESS_NO_INFO) {
-        return Statement.SUCCESS_NO_INFO;
-      }
-      count += i;
-    }
-    return count;
-  }
-
-  private static long countRows(int[] updateCount) {
-    long count = 0L;
-    for (int i : updateCount) {
-      if (i == Statement.SUCCESS_NO_INFO) {
-        return Statement.SUCCESS_NO_INFO;
-      }
-      count += i;
-    }
-    return count;
-  }
 
   private static String getSql(Object o) {
     if (o instanceof SqlProvider) {
@@ -1005,9 +981,8 @@ public final class JfrJdbcOperations implements JdbcOperations {
     return null;
   }
 
-
   private static void setRowCount(JdbcEvent event, Object o) {
-    int size = getSize(o);
+    int size = RowCountingUtil.getSize(o);
     if (size != -1) {
       event.setRowCount(size);
     } else {
@@ -1015,64 +990,48 @@ public final class JfrJdbcOperations implements JdbcOperations {
     }
   }
 
-  private static int getSize(Object o) {
-    if (o == null) {
-      return -1;
-    }
-    if (o instanceof Collection) {
-      return ((Collection<?>) o).size();
-    }
-    if (o instanceof Map) {
-      return ((Map<?, ?>) o).size();
-    }
-    if (o.getClass().isArray()) {
-      return Array.getLength(o);
-    }
-    return -1;
-  }
-
   @Label("Operation")
   @Description("A JDBC Operation")
   @Category(JfrConstants.CATEGORY)
   static class JdbcEvent extends Event {
-
+  
     @Label("Operation Name")
     @Description("The name of the JDBC operation")
     private String operationName;
-
+  
     @Label("Query")
     @Description("The SQL query string")
     private String query;
-
+  
     @Label("Row count")
     @Description("The number of rows returned or updated")
     // long instead of int to avoid overflows for batch updates
     private long rowCount;
-
+  
     String getOperationName() {
       return this.operationName;
     }
-
+  
     void setOperationName(String operationName) {
       this.operationName = operationName;
     }
-
+  
     String getQuery() {
       return this.query;
     }
-
+  
     void setQuery(String query) {
       this.query = query;
     }
-
+  
     long getRowCount() {
       return rowCount;
     }
-
+  
     void setRowCount(long resultSize) {
       this.rowCount = resultSize;
     }
-
+  
   }
 
 }
