@@ -14,7 +14,7 @@ This project requires Java 11 based on OpenJDK or later.
 </dependency>
 ```
 
-![Flight Recording of a JUnit Test](https://github.com/marschall/jfr-jdbctemplate/raw/master/src/main/javadoc/resources/Screenshot%20from%2019-05-13%21-09-33.png)
+![Flight Recording of a JUnit Test](https://github.com/marschall/jfr-jdbctemplate/raw/master/src/main/javadoc/resources/Screenshot%20from%202019-05-13%2021-09-33.png)
 
 Compared to approaches based on `DataSource` an approach based on `JdbcTemplate` has the advantage that it captures a complete database interaction. For example if you process many rows the initial `PreparedStatement#execute()` might be fast but most of the time may be spent in `ResultSet#next()`. A `JdbcTemplate` based approach generates a single JFR event for the entire interaction that involves several JDBC method invocations.
 
