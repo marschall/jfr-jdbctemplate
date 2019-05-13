@@ -25,6 +25,7 @@ Compared to approaches based on `DataSource` an approach based on `JdbcTemplate`
 
 Reported Attributes
 -------------------
+
 <dl>
 <dt>operationName</dt>
 <dd>The name of the execute JDBC operation, this corresponds to the method name on <code>JdbcOperations</code>/<code>JdbcTemplate</code>.</dd>
@@ -33,6 +34,17 @@ Reported Attributes
 <dt>rowCount</dt>
 <dd>In the case of a <code>SELECT</code> the number of rows returned. In the case of an <code>UPDATE</code> or <code>DELETE</code> the number of rows affected. <code>-1</code> for a statement that does not return anything like a DDL. <code>-2</code> when no information about the number of rows is available.</dd>
 </dl>
+
+Overhead
+--------
+
+We try to keep overhead to a minimum and have no additional allocations besides the JFR events. Besides the overhead of the event the only additional overhead is
+
+* a wrapper around `JdbcTemplate`
+* a few `instanceof` operations and casts
+* a `finally` block
+
+We assume `org.springframework.jdbc.core.SqlProvider#getSql()` is a simple getter.
 
 Usage
 -----
