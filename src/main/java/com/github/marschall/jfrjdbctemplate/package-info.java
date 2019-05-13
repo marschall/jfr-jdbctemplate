@@ -3,6 +3,7 @@
  * events.
  *
  * <table>
+ * <caption>JFR Support Classes</caption>
  * <thead>
  * <tr>
  *   <th>Spring Class</th>
