@@ -84,6 +84,17 @@
         </configuration>
       </plugin>
       <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <!-- Wildfly AS module System -->
+              <Dependencies>jdk.jfr</Dependencies>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
           <links>
@@ -212,7 +223,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <spring.version>5.1.6.RELEASE</spring.version>
+    <spring.version>5.1.7.RELEASE</spring.version>
   </properties>
 
 </project>
