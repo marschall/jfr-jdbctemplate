@@ -19,8 +19,8 @@ Compared to approaches based on `DataSource` an approach based on `JdbcTemplate`
 
  Spring Class                                                             | JFR Class                                                              |
 |-------------------------------------------------------------------------|------------------------------------------------------------------------|
-| `org.springframework.jdbc.core.JdbcOperations`                          | `com.github.marschall.jfrjdbctemplate.JfrJdbcOperations`               |
-| `org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations` | `com.github.marschall.jfrjdbctemplate.JfrNamedParameterJdbcOperations` |
+| `org.springframework.jdbc.core.JdbcOperations`                          | `com.github.marschall.jfr.jdbctemplate.JfrJdbcOperations`               |
+| `org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations` | `com.github.marschall.jfr.jdbctemplate.JfrNamedParameterJdbcOperations` |
 
 Reported Attributes
 -------------------

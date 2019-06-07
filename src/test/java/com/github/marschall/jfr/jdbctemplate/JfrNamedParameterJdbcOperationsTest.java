@@ -1,4 +1,4 @@
-package com.github.marschall.jfrjdbctemplate;
+package com.github.marschall.jfr.jdbctemplate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

@@ -1,4 +1,4 @@
-package com.github.marschall.jfrjdbctemplate;
+package com.github.marschall.jfr.jdbctemplate;
 
 final class JfrConstants {
 

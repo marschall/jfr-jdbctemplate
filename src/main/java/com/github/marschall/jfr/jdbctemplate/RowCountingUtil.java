@@ -1,4 +1,4 @@
-package com.github.marschall.jfrjdbctemplate;
+package com.github.marschall.jfr.jdbctemplate;
 
 import java.lang.reflect.Array;
 import java.sql.Statement;

@@ -13,11 +13,11 @@
  * <tbody>
  * <tr>
  *   <td>{@link org.springframework.jdbc.core.JdbcOperations}</td>
- *   <td>{@link com.github.marschall.jfrjdbctemplate.JfrJdbcOperations}</td>
+ *   <td>{@link com.github.marschall.jfr.jdbctemplate.JfrJdbcOperations}</td>
  * </tr>
  * <tr>
  *   <td>{@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations}</td>
- *   <td>{@link com.github.marschall.jfrjdbctemplate.JfrNamedParameterJdbcOperations}</td>
+ *   <td>{@link com.github.marschall.jfr.jdbctemplate.JfrNamedParameterJdbcOperations}</td>
  * </tr>
  * </tbody>
  * </table>
@@ -25,4 +25,4 @@
  * <h2>Screenshot</h2>
  * <img src="{@docRoot}/resources/Screenshot%20from%202019-05-13%2021-09-33.png" alt="Java Flight Recoder Screenshot">
  */
-package com.github.marschall.jfrjdbctemplate;
+package com.github.marschall.jfr.jdbctemplate;
