@@ -9,6 +9,6 @@ module com.github.marschall.jfrjdbctemplate {
   requires spring.tx;
   requires transitive spring.jdbc;
 
-  exports com.github.marschall.jfrjdbctemplate;
+  exports com.github.marschall.jfr.jdbctemplate;
 
 }
