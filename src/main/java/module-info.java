@@ -1,4 +1,4 @@
-module com.github.marschall.jfrjdbctemplate {
+module com.github.marschall.jfr.jdbctemplate {
 
   requires java.sql;
 
