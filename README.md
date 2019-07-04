@@ -78,7 +78,7 @@ You need something like the following JVM options to run Flight Recorder
 Limitations
 -----------
 
-* When the SQL query is not provided as a `String` but as a `PreparedStatementCreator` or `CallableStatementCreator` it has to implement `SqlProvider`
-* `JdbcTemplate#query(PreparedStatementCreator, PreparedStatementSetter, ResultSetExtractor)` is not available because it is defined on `JdbcTemplate` and not `JdbcOperations`
-* Several spring-jdbc classes `AbstractJdbcCall`, `SimpleJdbcCall`, `StoredProcedure`, `RdbmsOperation`, `AbstractJdbcInsert`, `SimpleJdbcInsert` but also `JdbcTestUtils` and `JdbcBeanDefinitionReader` required a `JdbcTemplate` and do not work with `JdbcOperations`. We have a [pull request](https://github.com/spring-projects/spring-framework/pull/23066/files) open for this but it has not been merged yet.
+* When the SQL query is not provided as a `String` but as a `PreparedStatementCreator` or `CallableStatementCreator` it has to implement `SqlProvider` for the query string to show up in the flight recording.
+* `JdbcTemplate#query(PreparedStatementCreator, PreparedStatementSetter, ResultSetExtractor)` is not available because it is defined on `JdbcTemplate` and not `JdbcOperations`.
+* Several spring-jdbc classes `AbstractJdbcCall`, `SimpleJdbcCall`, `StoredProcedure`, `RdbmsOperation`, `AbstractJdbcInsert`, `SimpleJdbcInsert` but also `JdbcTestUtils` and `JdbcBeanDefinitionReader` require a `JdbcTemplate` and do not work with `JdbcOperations`. We have a [pull request](https://github.com/spring-projects/spring-framework/pull/23066/files) open for this but it has not been merged yet.
 * `JdbcOperations#execute(ConnectionCallback)` can not provide any insight into what is executed inside, that would require integration with [marschall/jfr-jdbc](https://github.com/marschall/jfr-jdbc)
