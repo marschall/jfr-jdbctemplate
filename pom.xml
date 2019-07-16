@@ -116,7 +116,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <argLine>--add-opens com.github.marschall.jfrjdbctemplate/com.github.marschall.jfrjdbctemplate=ALL-UNNAMED</argLine>
+          <argLine>--add-opens com.github.marschall.jfr.jdbctemplate/com.github.marschall.jfr.jdbctemplate=ALL-UNNAMED</argLine>
         </configuration>
       </plugin>
       <plugin>
