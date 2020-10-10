@@ -8,12 +8,17 @@ import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 class JfrNamedParameterJdbcOperationsTest {
+
+  @RegisterExtension
+  static final JfrRecordingExtension JFR_RECORDING_EXTENSION = new JfrRecordingExtension(JfrNamedParameterJdbcOperations.JdbcNamedEvent.class);
+
 
   private SingleConnectionDataSource dataSource;
   private NamedParameterJdbcOperations jfrNamedJdbcOperations;

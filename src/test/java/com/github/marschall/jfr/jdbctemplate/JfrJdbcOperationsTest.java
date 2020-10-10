@@ -1,69 +1,30 @@
 package com.github.marschall.jfr.jdbctemplate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import java.io.IOException;
-import java.lang.invoke.MethodHandles;
-import java.nio.file.Path;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
-import jdk.jfr.EventType;
-import jdk.jfr.Recording;
-import jdk.jfr.consumer.RecordedEvent;
-import jdk.jfr.consumer.RecordingFile;
-
 class JfrJdbcOperationsTest {
 
-  static final Path RECORDING_LOCATION = Path.of("target", MethodHandles.lookup().lookupClass().getSimpleName() + ".jfr");
-
-  private static volatile Recording recording;
+  @RegisterExtension
+  static final JfrRecordingExtension JFR_RECORDING_EXTENSION = new JfrRecordingExtension(JfrJdbcOperations.JdbcEvent.class);
 
   private SingleConnectionDataSource dataSource;
   private JdbcOperations jfrJdbcOperations;
-
-  @BeforeAll
-  static void startRecording() throws IOException {
-    recording = new Recording();
-    recording.enable(JfrJdbcOperations.JdbcEvent.class);
-    recording.enable("org.junit.TestExecution");
-    recording.enable("org.junit.TestPlan");
-    recording.setMaxSize(1L * 1024L * 1024L);
-    recording.setToDisk(true);
-    recording.setDestination(RECORDING_LOCATION);
-    recording.start();
-  }
-
-  @AfterAll
-  static void stopRecording() throws IOException {
-    recording.close();
-    Set<String> eventNames = new HashSet<>();
-    try (RecordingFile recordingFile = new RecordingFile(RECORDING_LOCATION)) {
-      while (recordingFile.hasMoreEvents()) {
-        RecordedEvent event = recordingFile.readEvent();
-        EventType eventType = event.getEventType();
-        eventNames.add(eventType.getName());
-      }
-    }
-    assertFalse(eventNames.isEmpty());
-  }
 
   @BeforeEach
   void setUp() {
