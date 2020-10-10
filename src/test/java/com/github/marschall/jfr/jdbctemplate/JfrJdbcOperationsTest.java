@@ -16,7 +16,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
-class JrfJdbcOperationsTest {
+class JfrJdbcOperationsTest {
 
   //-XX:+FlightRecorder
   //-XX:StartFlightRecording=duration=120s,filename=recording.jfr
