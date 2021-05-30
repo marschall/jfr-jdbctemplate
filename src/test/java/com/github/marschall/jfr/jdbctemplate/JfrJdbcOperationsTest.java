@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,6 +63,15 @@ class JfrJdbcOperationsTest {
   @Test
   void customResultSetExtractor() {
     int[] array = this.jfrJdbcOperations.query("SELECT X FROM SYSTEM_RANGE(1, 10)", new IntArrayExtractor());
+    assertEquals(10, array.length);
+  }
+
+  @Test
+  void queryForStream() {
+    int[] array;
+    try (Stream<Integer> stream = this.jfrJdbcOperations.queryForStream("SELECT X FROM SYSTEM_RANGE(1, 10)", (rs, i) -> rs.getInt(1))) {
+      array = stream.mapToInt(Integer::intValue).toArray();
+    }
     assertEquals(10, array.length);
   }
 

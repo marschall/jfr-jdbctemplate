@@ -4,7 +4,9 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -427,6 +429,24 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
       event.end();
       event.commit();
     }
+  }
+
+  @Override
+  public <T> Stream<T> queryForStream(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper) throws DataAccessException {
+    JdbcNamedEvent event = new JdbcNamedEvent();
+    event.setOperationName("queryForStream");
+    event.setQuery(sql);
+    event.begin();
+    return new JfrEventStream<>(this.delegate.queryForStream(sql, paramMap, rowMapper), event);
+  }
+
+  @Override
+  public <T> Stream<T> queryForStream(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper) throws DataAccessException {
+    JdbcNamedEvent event = new JdbcNamedEvent();
+    event.setOperationName("queryForStream");
+    event.setQuery(sql);
+    event.begin();
+    return new JfrEventStream<>(this.delegate.queryForStream(sql, paramSource, rowMapper), event);
   }
 
   @Override

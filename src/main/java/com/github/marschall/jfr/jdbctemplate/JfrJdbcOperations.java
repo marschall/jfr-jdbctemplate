@@ -5,7 +5,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.CallableStatementCallback;
 import org.springframework.jdbc.core.CallableStatementCreator;
@@ -355,6 +357,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
   }
 
   @Override
+  @Deprecated
   public <T> T query(String sql, Object[] args, ResultSetExtractor<T> rse) {
     JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
@@ -432,6 +435,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
   }
 
   @Override
+  @Deprecated
   public void query(String sql, Object[] args, RowCallbackHandler rch) {
     JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
@@ -510,6 +514,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
   }
 
   @Override
+  @Deprecated
   public <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper) {
     JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
@@ -558,6 +563,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
   }
 
   @Override
+  @Deprecated
   public <T> T queryForObject(String sql, Object[] args, RowMapper<T> rowMapper) {
     JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForObject");
@@ -606,6 +612,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
   }
 
   @Override
+  @Deprecated
   public <T> T queryForObject(String sql, Object[] args, Class<T> requiredType) {
     JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForObject");
@@ -686,6 +693,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
   }
 
   @Override
+  @Deprecated
   public <T> List<T> queryForList(String sql, Object[] args, Class<T> elementType) {
     JdbcEvent event = new JdbcEvent();
     event.setOperationName("queryForList");
@@ -779,6 +787,42 @@ public final class JfrJdbcOperations implements JdbcOperations {
       event.end();
       event.commit();
     }
+  }
+
+  @Override
+  public <T> Stream<T> queryForStream(String sql, RowMapper<T> rowMapper) throws DataAccessException {
+    JdbcEvent event = new JdbcEvent();
+    event.setOperationName("queryForStream");
+    event.setQuery(sql);
+    event.begin();
+    return new JfrEventStream<>(this.delegate.queryForStream(sql, rowMapper), event);
+  }
+
+  @Override
+  public <T> Stream<T> queryForStream(PreparedStatementCreator psc, RowMapper<T> rowMapper) throws DataAccessException {
+    JdbcEvent event = new JdbcEvent();
+    event.setOperationName("queryForStream");
+    event.setQuery(getSql(psc));
+    event.begin();
+    return new JfrEventStream<>(this.delegate.queryForStream(psc, rowMapper), event);
+  }
+
+  @Override
+  public <T> Stream<T> queryForStream(String sql, PreparedStatementSetter pss, RowMapper<T> rowMapper) throws DataAccessException {
+    JdbcEvent event = new JdbcEvent();
+    event.setOperationName("queryForStream");
+    event.setQuery(sql);
+    event.begin();
+    return new JfrEventStream<>(this.delegate.queryForStream(sql, pss, rowMapper), event);
+  }
+
+  @Override
+  public <T> Stream<T> queryForStream(String sql, RowMapper<T> rowMapper, Object... args) throws DataAccessException {
+    JdbcEvent event = new JdbcEvent();
+    event.setOperationName("queryForStream");
+    event.setQuery(sql);
+    event.begin();
+    return new JfrEventStream<>(this.delegate.queryForStream(sql, rowMapper, args), event);
   }
 
   @Override

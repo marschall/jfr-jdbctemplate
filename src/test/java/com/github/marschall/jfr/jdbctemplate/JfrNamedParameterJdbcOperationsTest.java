@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,6 +57,15 @@ class JfrNamedParameterJdbcOperationsTest {
         + " WHERE c2 < :limit"
         + " ORDER bY c1", Map.of("limit", 100), Integer.class);
     assertEquals(List.of(1, 10), values);
+  }
+
+  @Test
+  void queryForStream() {
+    int[] array;
+    try (Stream<Integer> stream = this.jfrNamedJdbcOperations.queryForStream("SELECT x FROM SYSTEM_RANGE(1, 10) WHERE x < :limit", Map.of("limit", 10), (rs, i) -> rs.getInt(1))) {
+      array = stream.mapToInt(Integer::intValue).toArray();
+    }
+    assertEquals(9, array.length);
   }
 
 }
