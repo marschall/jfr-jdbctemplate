@@ -42,6 +42,7 @@ We try to keep overhead to a minimum and have no additional allocations besides 
 * a wrapper around `JdbcTemplate`
 * a few `instanceof` operations and casts
 * a `finally` block
+* a wrapper around `Stream` returned by the `#queryForStream` methods to record `Stream#close` as the end time of the event
 
 We assume `org.springframework.jdbc.core.SqlProvider#getSql()` is a simple getter.
 
@@ -82,3 +83,4 @@ Limitations
 * `JdbcTemplate#query(PreparedStatementCreator, PreparedStatementSetter, ResultSetExtractor)` is not available because it is defined on `JdbcTemplate` and not `JdbcOperations`.
 * Several spring-jdbc classes `AbstractJdbcCall`, `SimpleJdbcCall`, `StoredProcedure`, `RdbmsOperation`, `AbstractJdbcInsert`, `SimpleJdbcInsert` but also `JdbcTestUtils` and `JdbcBeanDefinitionReader` require a `JdbcTemplate` and do not work with `JdbcOperations`. We have a [pull request](https://github.com/spring-projects/spring-framework/pull/23066/files) open for this but it has not been merged yet.
 * `JdbcOperations#execute(ConnectionCallback)` can not provide any insight into what is executed inside, that would require integration with [marschall/jfr-jdbc](https://github.com/marschall/jfr-jdbc)
+* the `#queryForStream` methods record `Stream#close` as the end time of the event
