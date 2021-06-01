@@ -437,7 +437,11 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
     event.setOperationName("queryForStream");
     event.setQuery(sql);
     event.begin();
-    return new JfrEventStream<>(this.delegate.queryForStream(sql, paramMap, rowMapper), event);
+    return this.delegate.queryForStream(sql, paramMap, rowMapper)
+            .onClose(() -> {
+              event.end();
+              event.commit();
+            });
   }
 
   @Override
@@ -446,7 +450,11 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
     event.setOperationName("queryForStream");
     event.setQuery(sql);
     event.begin();
-    return new JfrEventStream<>(this.delegate.queryForStream(sql, paramSource, rowMapper), event);
+    return this.delegate.queryForStream(sql, paramSource, rowMapper)
+            .onClose(() -> {
+              event.end();
+              event.commit();
+            });
   }
 
   @Override

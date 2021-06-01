@@ -795,7 +795,11 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.setOperationName("queryForStream");
     event.setQuery(sql);
     event.begin();
-    return new JfrEventStream<>(this.delegate.queryForStream(sql, rowMapper), event);
+    return this.delegate.queryForStream(sql, rowMapper)
+            .onClose(() -> {
+              event.end();
+              event.commit();
+            });
   }
 
   @Override
@@ -804,7 +808,11 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.setOperationName("queryForStream");
     event.setQuery(getSql(psc));
     event.begin();
-    return new JfrEventStream<>(this.delegate.queryForStream(psc, rowMapper), event);
+    return this.delegate.queryForStream(psc, rowMapper)
+            .onClose(() -> {
+              event.end();
+              event.commit();
+            });
   }
 
   @Override
@@ -813,7 +821,11 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.setOperationName("queryForStream");
     event.setQuery(sql);
     event.begin();
-    return new JfrEventStream<>(this.delegate.queryForStream(sql, pss, rowMapper), event);
+    return this.delegate.queryForStream(sql, pss, rowMapper)
+            .onClose(() -> {
+              event.end();
+              event.commit();
+            });
   }
 
   @Override
@@ -822,7 +834,11 @@ public final class JfrJdbcOperations implements JdbcOperations {
     event.setOperationName("queryForStream");
     event.setQuery(sql);
     event.begin();
-    return new JfrEventStream<>(this.delegate.queryForStream(sql, rowMapper, args), event);
+    return this.delegate.queryForStream(sql, rowMapper, args)
+            .onClose(() -> {
+              event.end();
+              event.commit();
+            });
   }
 
   @Override
