@@ -37,12 +37,13 @@ Reported Attributes
 Overhead
 --------
 
-We try to keep overhead to a minimum and have no additional allocations besides the JFR events. Besides the overhead of the event the only additional overhead is
+We try to keep overhead to a minimum and have no additional allocations besides the JFR events. Besides the overhead of the event the only additional overhead is:
 
 * a wrapper around `JdbcTemplate`
 * a few `instanceof` operations and casts
 * a `finally` block
 * a capturing lambda for `#queryForStream` methods to record `Stream#close` as the end time of the event
+* a small wrapper around every `RowCallbackHandler`
 
 We assume `org.springframework.jdbc.core.SqlProvider#getSql()` is a simple getter.
 

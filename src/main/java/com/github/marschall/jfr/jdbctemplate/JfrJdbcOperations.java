@@ -1,5 +1,7 @@
 package com.github.marschall.jfr.jdbctemplate;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.List;
@@ -117,13 +119,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public void query(String sql, RowCallbackHandler rch) {
+    CountingRowCallbackHandler countingRowCallbackHandler = new CountingRowCallbackHandler(rch);
     JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
     try {
-      this.delegate.query(sql, rch);
-      event.setRowCount(Statement.SUCCESS_NO_INFO);
+      this.delegate.query(sql, countingRowCallbackHandler);
+      event.setRowCount(countingRowCallbackHandler.getRowCount());
     } finally {
       event.end();
       event.commit();
@@ -391,13 +394,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public void query(PreparedStatementCreator psc, RowCallbackHandler rch) {
+    CountingRowCallbackHandler countingRowCallbackHandler = new CountingRowCallbackHandler(rch);
     JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(getSql(psc));
     event.begin();
     try {
-      this.delegate.query(psc, rch);
-      event.setRowCount(Statement.SUCCESS_NO_INFO);
+      this.delegate.query(psc, countingRowCallbackHandler);
+      event.setRowCount(countingRowCallbackHandler.getRowCount());
     } finally {
       event.end();
       event.commit();
@@ -406,13 +410,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public void query(String sql, PreparedStatementSetter pss, RowCallbackHandler rch) {
+    CountingRowCallbackHandler countingRowCallbackHandler = new CountingRowCallbackHandler(rch);
     JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
     try {
-      this.delegate.query(sql, pss, rch);
-      event.setRowCount(Statement.SUCCESS_NO_INFO);
+      this.delegate.query(sql, pss, countingRowCallbackHandler);
+      event.setRowCount(countingRowCallbackHandler.getRowCount());
     } finally {
       event.end();
       event.commit();
@@ -421,13 +426,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public void query(String sql, Object[] args, int[] argTypes, RowCallbackHandler rch) {
+    CountingRowCallbackHandler countingRowCallbackHandler = new CountingRowCallbackHandler(rch);
     JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
     try {
-      this.delegate.query(sql, args, argTypes, rch);
-      event.setRowCount(Statement.SUCCESS_NO_INFO);
+      this.delegate.query(sql, args, argTypes, countingRowCallbackHandler);
+      event.setRowCount(countingRowCallbackHandler.getRowCount());
     } finally {
       event.end();
       event.commit();
@@ -437,13 +443,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
   @Override
   @Deprecated
   public void query(String sql, Object[] args, RowCallbackHandler rch) {
+    CountingRowCallbackHandler countingRowCallbackHandler = new CountingRowCallbackHandler(rch);
     JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
     try {
-      this.delegate.query(sql, args, rch);
-      event.setRowCount(Statement.SUCCESS_NO_INFO);
+      this.delegate.query(sql, args, countingRowCallbackHandler);
+      event.setRowCount(countingRowCallbackHandler.getRowCount());
     } finally {
       event.end();
       event.commit();
@@ -452,13 +459,14 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
   @Override
   public void query(String sql, RowCallbackHandler rch, Object... args) {
+    CountingRowCallbackHandler countingRowCallbackHandler = new CountingRowCallbackHandler(rch);
     JdbcEvent event = new JdbcEvent();
     event.setOperationName("query");
     event.setQuery(sql);
     event.begin();
     try {
-      this.delegate.query(sql, rch, args);
-      event.setRowCount(Statement.SUCCESS_NO_INFO);
+      this.delegate.query(sql, countingRowCallbackHandler, args);
+      event.setRowCount(countingRowCallbackHandler.getRowCount());
     } finally {
       event.end();
       event.commit();
@@ -1089,6 +1097,29 @@ public final class JfrJdbcOperations implements JdbcOperations {
 
     void setRowCount(long resultSize) {
       this.rowCount = resultSize;
+    }
+
+  }
+
+  static final class CountingRowCallbackHandler implements RowCallbackHandler {
+
+    private long count;
+
+    private final RowCallbackHandler delegate;
+
+    CountingRowCallbackHandler(RowCallbackHandler delegate) {
+      this.delegate = delegate;
+      this.count = 0L;
+    }
+
+    @Override
+    public void processRow(ResultSet rs) throws SQLException {
+      this.count += 1L;
+      this.delegate.processRow(rs);
+    }
+
+    long getRowCount() {
+      return this.count;
     }
 
   }

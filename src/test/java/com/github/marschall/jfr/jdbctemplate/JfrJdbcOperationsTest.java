@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
@@ -17,6 +18,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 class JfrJdbcOperationsTest {
@@ -64,6 +66,13 @@ class JfrJdbcOperationsTest {
   void customResultSetExtractor() {
     int[] array = this.jfrJdbcOperations.query("SELECT X FROM SYSTEM_RANGE(1, 10)", new IntArrayExtractor());
     assertEquals(10, array.length);
+  }
+
+  @Test
+  void rowCallbackHandler() {
+    AtomicInteger count = new AtomicInteger();
+    this.jfrJdbcOperations.query("SELECT X FROM SYSTEM_RANGE(1, 12)", (RowCallbackHandler) rs -> count.incrementAndGet());
+    assertEquals(12, count.get());
   }
 
   @Test
