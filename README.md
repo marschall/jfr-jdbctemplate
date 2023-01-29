@@ -9,9 +9,11 @@ This project requires Java 11 based on OpenJDK or later.
 <dependency>
   <groupId>com.github.marschall</groupId>
   <artifactId>jfr-jdbctemplate</artifactId>
-  <version>0.6.0</version>
+  <version>1.0.0</version>
 </dependency>
 ```
+
+Versions 1.x are intended for Spring 5.x / Java 11, versions 2.x are intended for Spring 6.x / Java 17.
 
 ![Flight Recording of a JUnit Test](https://github.com/marschall/jfr-jdbctemplate/raw/master/src/main/javadoc/resources/Screenshot%20from%202019-05-13%2021-09-33.png)
 
