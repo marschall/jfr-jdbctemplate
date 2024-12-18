@@ -992,6 +992,22 @@ public final class JfrJdbcOperations implements JdbcOperations {
       event.commit();
     }
   }
+  
+  @Override
+  public int[] batchUpdate(PreparedStatementCreator psc, BatchPreparedStatementSetter pss, KeyHolder generatedKeyHolder) {
+    JdbcEvent event = new JdbcEvent();
+    event.setOperationName("batchUpdate");
+    event.setQuery(getSql(psc));
+    event.begin();
+    try {
+      int[] updateCount = this.delegate.batchUpdate(psc, pss, generatedKeyHolder);
+      event.setRowCount(RowCountingUtil.countRows(updateCount));
+      return updateCount;
+    } finally {
+      event.end();
+      event.commit();
+    }
+  }
 
   @Override
   public <T> T execute(CallableStatementCreator csc, CallableStatementCallback<T> action) {

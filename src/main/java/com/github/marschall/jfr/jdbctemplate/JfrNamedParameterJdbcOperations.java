@@ -552,6 +552,38 @@ public final class JfrNamedParameterJdbcOperations implements NamedParameterJdbc
       event.commit();
     }
   }
+  
+  @Override
+  public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs, KeyHolder generatedKeyHolder) {
+    JdbcNamedEvent event = new JdbcNamedEvent();
+    event.setOperationName("batchUpdate");
+    event.setQuery(sql);
+    event.begin();
+    try {
+      int[] updateCount = this.delegate.batchUpdate(sql, batchArgs, generatedKeyHolder);
+      event.setRowCount(RowCountingUtil.countRows(updateCount));
+      return updateCount;
+    } finally {
+      event.end();
+      event.commit();
+    }
+  }
+  
+  @Override
+  public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs, KeyHolder generatedKeyHolder, String[] keyColumnNames) {
+    JdbcNamedEvent event = new JdbcNamedEvent();
+    event.setOperationName("batchUpdate");
+    event.setQuery(sql);
+    event.begin();
+    try {
+      int[] updateCount = this.delegate.batchUpdate(sql, batchArgs, generatedKeyHolder, keyColumnNames);
+      event.setRowCount(RowCountingUtil.countRows(updateCount));
+      return updateCount;
+    } finally {
+      event.end();
+      event.commit();
+    }
+  }
 
   private static void setRowCount(JdbcNamedEvent event, Object o) {
     int size = RowCountingUtil.getSize(o);
