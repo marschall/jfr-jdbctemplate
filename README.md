@@ -9,7 +9,7 @@ This project requires Java 11 based on OpenJDK or later.
 <dependency>
   <groupId>com.github.marschall</groupId>
   <artifactId>jfr-jdbctemplate</artifactId>
-  <version>2.1.0</version>
+  <version>3.0.0</version>
 </dependency>
 ```
 
