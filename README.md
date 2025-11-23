@@ -13,7 +13,9 @@ This project requires Java 11 based on OpenJDK or later.
 </dependency>
 ```
 
-Versions 1.x are intended for Spring 5.x / Java 11, versions 2.x are intended for Spring 6.x / Java 17.
+- versions 3.x are intended for Spring 7.x / Java 17
+- versions 2.x are intended for Spring 6.x / Java 17
+- versions 1.x are intended for Spring 5.x / Java 11
 
 ![Flight Recording of a JUnit Test](https://github.com/marschall/jfr-jdbctemplate/raw/master/src/main/javadoc/resources/Screenshot%20from%202019-05-13%2021-09-33.png)
 
