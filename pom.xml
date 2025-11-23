@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.marschall</groupId>
   <artifactId>jfr-jdbctemplate</artifactId>
-  <version>3.0.0-SNAPSHOT</version>
+  <version>3.0.0</version>
   <inceptionYear>2018</inceptionYear>
   <name>JFR JdbcTemplate</name>
   <description>A JdbcTemplate that generates JFR events.</description>
@@ -14,7 +14,7 @@
     <connection>scm:git:git@github.com:marschall/jfr-jdbctemplate.git</connection>
     <developerConnection>scm:git:git@github.com:marschall/jfr-jdbctemplate.git</developerConnection>
     <url>${project.url}</url>
-    <tag>HEAD</tag>
+    <tag>3.0.0</tag>
   </scm>
 
   <developers>
@@ -256,7 +256,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <project.build.outputTimestamp>2024-12-18T19:14:23Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2025-11-23T16:41:12Z</project.build.outputTimestamp>
     <maven.compiler.release>17</maven.compiler.release>
   </properties>
 
