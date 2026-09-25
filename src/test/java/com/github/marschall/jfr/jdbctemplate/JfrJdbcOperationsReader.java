@@ -14,7 +14,7 @@ import jdk.jfr.consumer.RecordingFile;
 public class JfrJdbcOperationsReader {
 
   public static void main(String[] args) throws IOException {
-    Path path = Paths.get("/home/marschall/git/jfr-demo/recording.jfr");
+    Path path = Paths.get(System.getProperty("user.home")).resolve("git/jfr-demo/recording.jfr");
     Map<String, Duration> histogram = new HashMap<>();
     try (RecordingFile recording = new RecordingFile(path)) {
       while (recording.hasMoreEvents()) {

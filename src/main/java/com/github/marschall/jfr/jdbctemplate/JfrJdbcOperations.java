@@ -946,7 +946,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
   }
 
   @Override
-  public int[] batchUpdate(String sql, List<Object[]> batchArgs) {
+  public int[] batchUpdate(String sql, List<? extends Object[]> batchArgs) {
     JdbcEvent event = new JdbcEvent();
     event.setOperationName("batchUpdate");
     event.setQuery(sql);
@@ -962,7 +962,7 @@ public final class JfrJdbcOperations implements JdbcOperations {
   }
 
   @Override
-  public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) {
+  public int[] batchUpdate(String sql, List<? extends Object[]> batchArgs, int[] argTypes) {
     JdbcEvent event = new JdbcEvent();
     event.setOperationName("batchUpdate");
     event.setQuery(sql);
